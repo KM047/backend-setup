@@ -1,0 +1,19 @@
+{
+  "name": "03_setup-a-pro-backend-project",
+  "version": "1.0.0",
+  "description": "This project for the pro backend setup.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon scr/index.js"
+  },
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "author": "Kunal Mandave",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
