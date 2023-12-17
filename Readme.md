@@ -48,6 +48,8 @@
     },
     ```
 
+---
+
 - step 7: Creating src directory and in this src directory add below files using terminal or you can also create that using the vs code as usual.
 
   ```shell
@@ -55,6 +57,8 @@
   /src:~$ mkdir controllers db middlewares models routes utils
 
   ```
+
+---
 
 - step 8: Install the prettier for formatting the code.
 
