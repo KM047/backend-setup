@@ -1,4 +1,4 @@
-# Setup the Backend as Professional
+# Setup a Backend as Professional
 
 > This project includes the how a professional developer can setup the backend and the configuration settings for the backend.
 
@@ -6,9 +6,9 @@
 
 - step 1: first initialize the backend setup using below command
 
-```shell
-    $ node init
-```
+  ```shell
+  node init
+  ```
 
 ---
 
@@ -91,3 +91,28 @@
       "semi": true
     }
     ```
+
+---
+
+- step 8: To connect the mongoose database
+
+  - install the mongoose, express, dotenv dependency.
+
+    ```shell
+    npm i mongoose express dotenv
+    ```
+
+    > In this you can connect the database using 2 method
+
+    - Method 1: connect the database using IIFE (eg. (your function)()) in index.js
+    - Method 2: Write a function another directory like [DB](./src/db/index.js) and import it into the [index.js](./src/index.js) file
+
+  > In this we use dotenv dependency to import the env files as in the module form but we need to some configuration in this.
+
+  ```javascript
+  import dotenv from "dotenv";
+
+  dotenv.config({
+    path: "./env", // path to the env file
+  });
+  ```
