@@ -116,3 +116,79 @@
     path: "./env", // path to the env file
   });
   ```
+
+- step 9: Created the utilities in the [utils](./src/utils/) and write the API handlers.
+
+  - [asyncHandler.js](./src/utils/asyncHandler.js)
+  - [ApiResponse.js](./src/utils/ApiResponse.js)
+  - [ApiError.js](./src/utils/ApiError.js)
+
+- step 10: Create the user and video model for the database
+- step 11: Install the [mongoose-aggregate-paginate-v2](https://www.npmjs.com/package/mongoose-aggregate-paginate-v2) to allow for write aggregation query
+
+  ```shell
+  npm i mongoose-aggregate-paginate-v2
+  ```
+
+- step 12: Install the [bcrypt](https://www.npmjs.com/package/bcrypt). A library to help you hash passwords.
+
+  ```shell
+    npm i bcrypt
+  ```
+
+- step 13: Install the [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken) library to generate JSON web tokens for authentication purposes.
+
+  ```shell
+  npm i jsonwebtoken
+  ```
+
+  > **JSON Web Token (JWT)** is a compact, URL-safe means of representing
+  > claims to be transferred between two parties. The claims in a JWT
+  > are encoded as a JSON object that is used as the payload of a JSON
+  > Web Signature (JWS) structure or as the plaintext of a JSON Web
+  > Encryption (JWE) structure, enabling the claims to be digitally
+  > signed or integrity protected with a Message Authentication Code
+  > (MAC) and/or encrypted.
+  > [reference](<[https://](https://datatracker.ietf.org/doc/html/rfc7519)>)
+
+- step 14: Added user and video configuration and added own methods to the schema using mongoose builtin methods -> `pre and methods`.
+
+  > This **pre** is middleware which will run before saving the data in database or it run before the any other methods.
+
+  ```javascript
+  userSchema.pre("save", async function (next) {
+    // ? This check is necessary because we don't want to rerun this code on every entity change
+
+    if (this.isModified("password")) {
+      this.password = bcrypt.hash(this.password, 10);
+    }
+    next();
+  });
+  ```
+
+  > This **methods** we can write our own methods for authentication or for any other tasks.
+  > for example :- [user.models.js](./src/models/user.models.js)
+
+  - `userSchema.methods.isPasswordCorrect()`
+  - `userSchema.methods.generateAccessToken()`
+  - `userSchema.methods.generateRefreshToken()`
+
+  > In the above function we use the `jwt.sign()` method to generate a refresh token for the user .
+  - [user.models.js](./src/models/user.models.js)
+
+  ```javascript
+  // This is code from userSchema.methods.generateAccessToken()
+  return jwt.sign(
+    {
+      // This will generate payload (data which you want to send)
+      _id: this._id,
+      email: this.email,
+      username: this.username,
+      fullName: this.fullName,
+    },
+    process.env.ACCESS_TOKEN_SECRET, 
+    {
+      expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+    }
+  );
+  ```
