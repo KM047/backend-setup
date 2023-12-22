@@ -151,7 +151,7 @@
   > (MAC) and/or encrypted.
   > [reference](<[https://](https://datatracker.ietf.org/doc/html/rfc7519)>)
 
-- step 14: Added user and video configuration and added own methods to the schema using mongoose builtin methods -> `pre and methods`.
+- step 14: Added user and video configuration and added own methods to the schema using mongoose methods -> `pre and methods`.
 
   > This **pre** is middleware which will run before saving the data in database or it run before the any other methods.
 
@@ -174,6 +174,7 @@
   - `userSchema.methods.generateRefreshToken()`
 
   > In the above function we use the `jwt.sign()` method to generate a refresh token for the user .
+
   - [user.models.js](./src/models/user.models.js)
 
   ```javascript
@@ -186,9 +187,67 @@
       username: this.username,
       fullName: this.fullName,
     },
-    process.env.ACCESS_TOKEN_SECRET, 
+    process.env.ACCESS_TOKEN_SECRET,
     {
       expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
     }
   );
   ```
+
+- step 15: Install the cloudinary (from cloudinary website) and [multer](https://www.npmjs.com/package/multer?activeTab=readme) package
+
+  - Configure the utilities for the cloudinary data connection in [cloudinaryFileUpload.js](./src/utils/cloudinaryFileUpload.js)
+
+    - Configure the cloudinary data connection.
+
+    ```javascript
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+    ```
+
+    - Write a async function for file upload.
+
+      ```javascript
+      const uploadOnCloudinary = async (fileLocalPath) => {
+        try {
+          if (!fileLocalPath) return null;
+
+          // Upload the file on the cloudinary
+          const response = await cloudinary.uploader.upload(fileLocalPath, {
+            resource_type: "auto", // This will automatic detect file type
+          });
+
+          // file has been uploaded on the cloudinary successfully
+          console.log("file uploaded successfully", response.url);
+
+          return response;
+        } catch (error) {
+          fs.unlinkSync(fileLocalPath); // remove temporary file locally if it exists locally as the upload operation got failed
+        }
+      };
+      ```
+
+  - created middleware for file upload using [multer](./src/middlewares/multer.middleware.js)
+
+    - created middleware for file upload using multer
+
+      ```javascript
+      import multer from "multer";
+      const storage = multer.diskStorage({
+        destination: function (req, file, cb) {
+          cb(null, "./public/temp");
+        },
+        filename: function (req, file, cb) {
+          //This code for adding unique file name
+          //const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() \* 1E9)
+          cb(null, file.originalname);
+        },
+      });
+
+      export const upload = multer({
+        storage,
+      });
+      ```
