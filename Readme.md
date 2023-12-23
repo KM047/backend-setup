@@ -251,3 +251,38 @@
         storage,
       });
       ```
+
+- step 16: Rotes and controllers
+
+  > In this we write our first controller in the controller folder [user.controller.js](./src/controllers/user.controller.js)
+
+  - In this import [asyncHandler.js](./src/utils/asyncHandler.js) which we created for the error handling
+  - An now we create our registerUser to see how we write the routes
+
+    ```javascript
+    const registerUser = asyncHandler(async (req, res) => {
+      res.status(200).json({
+        message: "ok Kunal",
+      });
+    });
+    ```
+
+- step 17: In this we write a route for that controller [user.routes.js](./src/routes/user.routes.js).
+
+  - In this we write routes like this
+
+    ```javascript
+    router.route("/register").post(registerUser);
+    ```
+
+  - After made this route we want to declare it so, the best way to declare it in app.js where we write code like this and we import it in where we start writing code and not it the starting of file.
+
+    ```javascript
+    // Routes imported this is known as a file segregation
+    import userRouter from "./routes/user.routes.js";
+
+    // Routes Declaration
+    app.use("/api/v1/users", userRouter);
+    ```
+
+  > And the URL becomes like this <http://localhost:8000/api/v1/users/register>
