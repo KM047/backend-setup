@@ -52,7 +52,7 @@ userSchema.pre("save", async function (next) {
   // ? This check is necessary because we don't want to rerun this code on every entity change
 
   if (this.isModified("password")) {
-    this.password = bcrypt.hash(this.password, 10);
+    this.password = await bcrypt.hash(this.password, 10);
   }
   next();
 });

@@ -160,7 +160,7 @@
     // ? This check is necessary because we don't want to rerun this code on every entity change
 
     if (this.isModified("password")) {
-      this.password = bcrypt.hash(this.password, 10);
+      this.password = await bcrypt.hash(this.password, 10);
     }
     next();
   });
@@ -286,3 +286,16 @@
     ```
 
   > And the URL becomes like this <http://localhost:8000/api/v1/users/register>
+
+- step 18: Now we have to build the user registration controller in this we use the multer for file upload
+
+  - First we register the user we defines the steps below
+    1) Get the user details from frontend
+    2) Validate the user details are not empty
+    3) Check the user which is already registered or not: username, email
+    4) Check for user image and avatar
+    5) Upload them to cloudinary: avatar
+    6) Create a user object - create a entry in db
+    7) Remove password and refresh token from the response
+    8) Check for user creation
+    9) return response
