@@ -25,7 +25,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const { fullName, username, email, password } = req.body;
   console.log("Email: ", email);
-  console.log(req.body);
+  console.log("req.body -> ", req.body);
 
   // Checking if user data is send or not
   //   res.status(200).json({
@@ -52,18 +52,26 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // Checking if user is already registered
-  const userExist = User.findOne({
+  const userExist = await User.findOne({
     $or: [{ username }, { email }],
   });
-  console.log(userExist);
+  console.log("userExist -> ", userExist);
   if (userExist) {
     throw new ApiError(409, "User with username or email already exists");
   }
 
-  console.log(req.files);
+  console.log("req.files -> ", req.files);
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path; // In this when we didn't have coverImage then it throw error like 'Cannot read properties of undefined'
 
+  // ! So we can do it in this method we can also do for avatar
+
+  let coverImageLocalPath;
+  if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
+
+  console.log("avatarLocalPath ", avatarLocalPath);
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
@@ -74,6 +82,8 @@ const registerUser = asyncHandler(async (req, res) => {
   if (!avatar) {
     throw new ApiError(400, "Avatar file is required");
   }
+
+  console.log("avatar -> ", avatar);
 
   const user = await User.create({
     fullName,
