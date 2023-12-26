@@ -290,12 +290,59 @@
 - step 18: Now we have to build the user registration controller in this we use the multer for file upload
 
   - First we register the user we defines the steps below
-    1) Get the user details from frontend
-    2) Validate the user details are not empty
-    3) Check the user which is already registered or not: username, email
-    4) Check for user image and avatar
-    5) Upload them to cloudinary: avatar
-    6) Create a user object - create a entry in db
-    7) Remove password and refresh token from the response
-    8) Check for user creation
-    9) return response
+    1. Get the user details from frontend
+    2. Validate the user details are not empty
+    3. Check the user which is already registered or not: username, email
+    4. Check for user image and avatar
+    5. Upload them to cloudinary: avatar
+    6. Create a user object - create a entry in db
+    7. Remove password and refresh token from the response
+    8. Check for user creation
+    9. return response
+
+- step 19:
+
+  - **Access tokens**
+    > Provide the client with access to the user's data in the application. They contain all the information the server needs to know if the user / device can access the resource you are requesting or not. They are usually expired tokens with a short validity period.
+  - **Refresh tokens**
+    > A long-lived special kind of token used to obtain a renewed access token. They manage the access token (like generation, revocation, scoping, etc.). A refresh token allows the user to get a new access token without needing to log in again.
+  - [03:03](https://youtu.be/7DVpag3cO0g?t=183s) 🕒 Token Lifespan and Types
+
+    - Access tokens are usually short-lived, while refresh tokens have a longer lifespan.
+    - Short-lived tokens can last 15 minutes for access tokens, and long-lived tokens can extend up to 30 days or even a year.
+    - The choice between short and long-lived tokens depends on security and use-case requirements.
+
+  - [03:43](https://youtu.be/7DVpag3cO0g?t=223s) 🔄 Interaction between Access and Refresh Tokens
+
+    - Access tokens allow authorization for resource access until they expire.
+    - Refresh tokens, when validated, grant a new access token without requiring the user to enter credentials.
+    - Demonstrates the importance of managing sessions effectively to avoid unnecessary password re-entry.
+
+  - [04:12](https://youtu.be/7DVpag3cO0g?t=252s) 🔐 Security Measures in Token Handling
+
+    - The video emphasizes storing both access and refresh tokens securely in the database.
+    - A secure process validates the user through access tokens but requires refresh tokens for more extended sessions.
+    - Highlights the token exchange process, ensuring a seamless and secure user experience.
+
+  - [04:40](https://youtu.be/7DVpag3cO0g?t=280s) 🔄 Token Refresh Workflow
+
+    - Illustrates the token refresh workflow where the server validates the refresh token against the database.
+    - In case of a match, a new access token is issued to the user, maintaining a continuous user session.
+    - Reinforces the concept that token expiration does not necessarily require re-entering the password.
+
+  - [05:05](https://youtu.be/7DVpag3cO0g?t=305s) 🔧 Implementation Steps for Login User
+
+    - Outlines the steps for implementing a basic login user function in the user controller.
+    - Focuses on handling requests and responses within the user controller and its associated handler.
+    - Exporting the login functionality for integration into the larger application structure.
+      1. get user data from req.body
+      2. get the user credentials -> username and email
+      3. find the user
+      4. password check
+      5. give refresh token and access token
+      6. send it in secure cookies
+
+> Some important notes
+
+- The **$or** operator performs a logical OR operation on an array of one or more <expressions> and selects the documents that satisfy at least one of the <expressions>
+- **$set** outputs documents that contain all existing fields from the input documents and newly added fields.
