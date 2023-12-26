@@ -346,3 +346,19 @@
 
 - The **$or** operator performs a logical OR operation on an array of one or more <expressions> and selects the documents that satisfy at least one of the <expressions>
 - **$set** outputs documents that contain all existing fields from the input documents and newly added fields.
+
+## Access Token and Refresh Token
+
+![alt](https://media.geeksforgeeks.org/wp-content/uploads/20220401174334/Screenshot20220401174003.png)
+
+- **Refresh Token Logic**
+
+  Verifying the refresh token in the backend.
+  Matching the received refresh token with the one stored in the database.
+  Generating and sending a new access token and refresh token.
+
+- **Token Refresh Mechanism**
+
+  Managing token refresh in the backend.
+  Initiating a new request from the frontend to refresh the token.
+  Updating the access token and refresh token in the database.
