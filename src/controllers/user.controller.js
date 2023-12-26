@@ -4,10 +4,6 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinaryFileUpload.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-<<<<<<< HEAD
-=======
-import { response } from "express";
->>>>>>> b2f8b1c30470193bcb8071af8e0570a04f1b0df5
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
