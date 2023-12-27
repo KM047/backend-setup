@@ -4,6 +4,7 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary } from "../utils/cloudinaryFileUpload.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -306,7 +307,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(200, req.user, "Current user fetched successfully");
+    .json(new ApiResponse(200, req.user, "Current user fetched successfully"));
 });
 
 // NOTE: In this we can use avatar and coverImage but it always better to separate controller and end point for the particular file update
@@ -317,7 +318,7 @@ const updatedUserDetails = asyncHandler(async (req, res) => {
     throw new ApiError(400, "All files are required");
   }
 
-  const user = User.findByIdAndUpdate(
+  const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
       $set: {
@@ -349,6 +350,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   if (!avatarLocal) {
     throw new ApiError(400, "Avatar file is missing");
   }
+
+  // TODO: delete old image which is on cloudinary
 
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
@@ -401,6 +404,138 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, user, "CoverImage updated successfully"));
 });
 
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+
+  if (!username?.trim()) {
+    throw new ApiError(400, "User is missing");
+  }
+
+  const channel = await User.aggregate([
+    // First pipeline -> check user match or not
+    {
+      $match: {
+        username: username?.toLowerCase(),
+      },
+    },
+    // Second pipeline -> for user which channel is subscribers
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+      },
+    },
+    // Third pipeline -> for channel which the user subscribed
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "subscriber",
+        as: "subscribedTo",
+      },
+    },
+    // Fourth pipeline -> for checking count of subscribers and channels
+    {
+      $addFields: {
+        subscriberCount: {
+          $size: "$subscribers",
+        },
+        channelSubscribedToCount: {
+          $size: "$subscribedTo",
+        },
+        isSubscribed: {
+          $cond: {
+            if: { $in: [req.user?._id, "$subscribers.subscriber"] },
+            then: true,
+            else: false,
+          },
+        },
+      },
+    },
+    // Fifth pipeline -> for projection which gives only selected value
+    {
+      $project: {
+        username: 1,
+        fullName: 1,
+        avatar: 1,
+        coverImage: 1,
+        email: 1,
+        subscriberCount: 1,
+        channelSubscribedToCount: 1,
+        isSubscribed: 1,
+      },
+    },
+  ]);
+
+  if (!channel?.length) {
+    throw new ApiError(404, "Channel does not exist");
+  }
+  console.log(" The output data from the pipeline", channel);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, channel[0], "User channel fetched successfully.")
+    );
+});
+
+const getWatchHistory = asyncHandler(async (req, res) => {
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(req.user._id), // NOTE: In this the _id gives us an ObjectId as string so want to write like this because this cannot transform into that value
+      },
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchHistory",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              // TODO: In this you change the owner field in second stage of the pipeline TRY ONCE
+              pipeline: [
+                {
+                  $project: {
+                    username: 1,
+                    fullName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "Watch history fetched successfully"
+      )
+    );
+});
+
 export {
   registerUser,
   loginUser,
@@ -411,4 +546,6 @@ export {
   updatedUserDetails,
   updateUserAvatar,
   updateUserCoverImage,
+  getUserChannelProfile,
+  getWatchHistory,
 };
