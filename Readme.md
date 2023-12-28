@@ -351,6 +351,8 @@
 
 ![alt](https://media.geeksforgeeks.org/wp-content/uploads/20220401174334/Screenshot20220401174003.png)
 
+<!-- <img src="https://media.geeksforgeeks.org/wp-content/uploads/20220401174334/Screenshot20220401174003.png"  width="500" alt="logo" > -->
+
 - **Refresh Token Logic**
 
   Verifying the refresh token in the backend.
@@ -362,3 +364,21 @@
   Managing token refresh in the backend.
   Initiating a new request from the frontend to refresh the token.
   Updating the access token and refresh token in the database.
+
+## MongoDB Aggregation Pipeline
+
+- An **aggregation pipeline** consists of one or more stages that process documents:
+
+  - Each stage performs an operation on the input documents. For example, a stage can filter documents, group documents, and calculate values.
+
+  - The documents that are output from a stage are passed to the next stage.
+
+  - An aggregation pipeline can return results for groups of documents. For example, return the total, average, maximum, and minimum values.
+
+- **Aggregation Stages**
+  - [$addFields]([https://](https://www.mongodb.com/docs/current/reference/operator/aggregation/addFields/))
+  - [$lookup](https://www.mongodb.com/docs/current/reference/operator/aggregation/lookup/)
+  - [$match](https://www.mongodb.com/docs/current/reference/operator/aggregation/match/)
+  - [$project](https://www.mongodb.com/docs/current/reference/operator/aggregation/project/)
+  - [$set](https://www.mongodb.com/docs/current/reference/operator/aggregation/set/)
+  - [$cond](https://www.mongodb.com/docs/current/reference/operator/aggregation/cond/)
