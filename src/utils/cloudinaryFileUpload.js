@@ -9,6 +9,7 @@ cloudinary.config({
 
 const uploadOnCloudinary = async (fileLocalPath) => {
   try {
+    console.log("File is in uploadOnCloudinary ", fileLocalPath)
     if (!fileLocalPath) return null;
 
     // Upload the file on the cloudinary
@@ -17,7 +18,7 @@ const uploadOnCloudinary = async (fileLocalPath) => {
     });
 
     // file has been uploaded on the cloudinary successfully
-    // console.log("file uploaded successfully", response.url);
+    console.log("file uploaded successfully", response.url);
     fs.unlinkSync(fileLocalPath);
 
     return response;
@@ -33,4 +34,14 @@ const uploadOnCloudinary = async (fileLocalPath) => {
  * Using uploader.destroy(publicId, cb) this method
  */
 
-export { uploadOnCloudinary };
+const deleteOldFileInCloudinary = async (oldAvatar) => {
+  const response = await cloudinary.uploader.destroy(oldAvatar,{
+    resource_type: "image",
+  },(result) => {
+    console.log("Delete result", result);
+  })
+
+  return response;
+}
+
+export { uploadOnCloudinary,deleteOldFileInCloudinary };

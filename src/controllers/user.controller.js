@@ -1,7 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-import { uploadOnCloudinary } from "../utils/cloudinaryFileUpload.js";
+import {
+  deleteOldFileInCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinaryFileUpload.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -111,8 +114,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     fullName,
-    avatar: avatar.url,
-    coverImage: coverImage?.url || "",
+    // avatar: avatar.url,
+    // coverImage: coverImage?.url || "",
+    avatar: { publicId: avatar.public_id, url: avatar.url },
+    coverImage: {
+      publicId: coverImage?.public_id || "",
+      url: coverImage?.url || "",
+    },
     email,
     password,
     username: username.toLowerCase(),
@@ -347,14 +355,20 @@ const updatedUserDetails = asyncHandler(async (req, res) => {
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
-  if (!avatarLocal) {
+  if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is missing");
   }
 
-  // TODO: delete old image which is on cloudinary
+  console.log("avatarLocalPath ", avatarLocalPath);
 
+  // FIXED: delete old image which is on cloudinary
+
+  const oldAvatar = req.user.avatar;
+
+  console.log("oldAvatar  ", oldAvatar);
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
+  console.log(avatar);
   if (!avatar.url) {
     throw new ApiError(500, "Something went wrong while uploading avatar");
   }
@@ -363,13 +377,26 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: { publicId: avatar.public_id, url: avatar.url },
       },
     },
     {
       new: true,
     }
   ).select("-password -refreshToken");
+
+  if (!user) {
+    throw new ApiError(500, "Something went wrong or User not found");
+  }
+
+  try {
+    const isOldImageDelete = await deleteOldFileInCloudinary(
+      oldAvatar.publicId
+    );
+    console.log("isOldImageDelete ", isOldImageDelete);
+  } catch (error) {
+    console.log("error - ", error);
+  }
 
   return res
     .status(200)
@@ -378,6 +405,18 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
+
+  const oldCoverImage = req.user.coverImage;
+
+  /**
+   * TODO: check
+   * 1) if user have not already cover image and it update what the value of oldCoverImage this.
+   * 2) if it give error then handle it properly
+   */ 
+  
+  if(!oldCoverImage) {
+    throw new ApiError(401, "Cover image not found");
+  }
 
   if (!coverImageLocalPath) {
     throw new ApiError(400, "CoverImage file is missing");
@@ -393,11 +432,23 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        coverImage: coverImage.url,
+        coverImage: {
+          publicId: coverImage?.public_id || "",
+          url: coverImage?.url || "",
+        },
       },
     },
     { new: true }
   );
+
+  try {
+    const isOldImageDelete = await deleteOldFileInCloudinary(
+      oldCoverImage.publicId
+    );
+    console.log("isOldImageDelete ", isOldImageDelete);
+  } catch (error) {
+    console.log("error - ", error);
+  }
 
   return res
     .status(200)
