@@ -13,12 +13,12 @@ const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const newRefreshToken = user.generateRefreshToken();
 
-    user.refreshToken = refreshToken;
+    user.refreshToken = newRefreshToken;
     await user.save({ validateBeforeSave: false });
 
-    return { accessToken, refreshToken };
+    return { accessToken, newRefreshToken };
   } catch (error) {
     throw new ApiError(
       500,
@@ -182,7 +182,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Passwords do not match");
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+  const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
 
@@ -200,14 +200,14 @@ const loginUser = asyncHandler(async (req, res) => {
   return res
     .status(200)
     .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", accessToken, options)
+    .cookie("refreshToken", newRefreshToken, options)
     .json(
       new ApiResponse(
         200,
         {
           user: loggedInUser,
           accessToken,
-          refreshToken,
+          refreshToken: newRefreshToken,
         },
         "User logged in successfully"
       )
@@ -242,17 +242,20 @@ const logoutUser = asyncHandler(async (req, res) => {
 });
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  const incomingRefreshToken = req.cookie.refreshToken || req.body.refreshToken;
+  const incomingRefreshToken = req.user.refreshToken;
 
   if (!incomingRefreshToken) {
     throw new ApiError(401, "Unauthorized request");
   }
 
   try {
+    console.log("incomingRefreshToken ", incomingRefreshToken);
     const decodedToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
+
+    console.log(" Decoded token: ", decodedToken);
 
     const user = await User.findById(decodedToken?._id);
 
@@ -294,11 +297,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentUserPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
-  const user = User.findById(req.user?._id);
+  const user = await User.findById(req.user?._id);
 
-  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  const isPasswordValid = await user.isPasswordCorrect(oldPassword);
 
-  if (!isPasswordCorrect) {
+  console.log("isPasswordValid", isPasswordValid);
+
+  if (!isPasswordValid) {
     throw new ApiError(400, "Invalid password");
   }
 
@@ -307,7 +312,9 @@ const changeCurrentUserPassword = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(new ApiResponse(200, {}, "Password updated successfully"));
+    .json(
+      new ApiResponse(200, {}, "Password updated successfully")
+    );
 });
 /** */
 const getCurrentUser = asyncHandler(async (req, res) => {
@@ -320,7 +327,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 // NOTE: In this we can use avatar and coverImage but it always better to separate controller and end point for the particular file update
 const updatedUserDetails = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body;
+  const { fullName, username, email } = req.body;
 
   if (!(fullName || username || email)) {
     throw new ApiError(400, "All files are required");
@@ -330,6 +337,7 @@ const updatedUserDetails = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
+        username,
         fullName,
         email,
       },
@@ -409,12 +417,12 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   const oldCoverImage = req.user.coverImage;
 
   /**
-   * TODO: check
+   * FIXED: check
    * 1) if user have not already cover image and it update what the value of oldCoverImage this.
    * 2) if it give error then handle it properly
-   */ 
-  
-  if(!oldCoverImage) {
+   */
+
+  if (!oldCoverImage) {
     throw new ApiError(401, "Cover image not found");
   }
 
@@ -441,13 +449,15 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  try {
-    const isOldImageDelete = await deleteOldFileInCloudinary(
-      oldCoverImage.publicId
-    );
-    console.log("isOldImageDelete ", isOldImageDelete);
-  } catch (error) {
-    console.log("error - ", error);
+  if (!oldCoverImage.publicId === "") {
+    try {
+      const isOldImageDelete = await deleteOldFileInCloudinary(
+        oldCoverImage.publicId
+      );
+      console.log("isOldImageDelete ", isOldImageDelete);
+    } catch (error) {
+      console.log("error - ", error);
+    }
   }
 
   return res
