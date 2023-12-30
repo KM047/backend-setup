@@ -1,6 +1,6 @@
 # Setup a Backend as Professional
 
-> This project includes the how a professional developer can setup the backend and the configuration settings for the backend.
+> This project includes the how a professional developer can setup the backend and the configuration settings for the backend and frontend.
 
 ## Following are the steps
 
@@ -32,9 +32,9 @@
 
 ---
 
-- step 6: Node mana is used to save files and restart the server during development.
+- step 6: Node mon is used to save files and restart the server during development.
 
-  - Installing the [node man](https://www.npmjs.com/package/nodemon) as dev dependency
+  - Installing the [node mon](https://www.npmjs.com/package/nodemon) as dev dependency
 
     ```shell
     npm install -D nodemon
@@ -80,17 +80,7 @@
     }
     ```
 
-  - Setting up prettier ignore which ignore the files which don't apply on that file [.prettierignore](.prettierignore) is
-
-    ```json
-    {
-      "singleQuote": false,
-      "bracketSpacing": true,
-      "tabWidth": 2,
-      "trailingComma": "es5",
-      "semi": true
-    }
-    ```
+  - Setting up prettier ignore which ignore the files which don't apply on that file [.prettierignore](.prettierignore).
 
 ---
 
@@ -107,13 +97,13 @@
     - Method 1: connect the database using IIFE (eg. (your function)()) in index.js
     - Method 2: Write a function another directory like [DB](./src/db/index.js) and import it into the [index.js](./src/index.js) file
 
-  > In this we use dotenv dependency to import the env files as in the module form but we need to some configuration in this.
+  > In this we use dotenv dependency to import the env files as in the module form but we need to some configuration in this [index.js](./src/index.js) file.
 
   ```javascript
   import dotenv from "dotenv";
 
   dotenv.config({
-    path: "./env", // path to the env file
+    path: "./.env", // path to the env file
   });
   ```
 
@@ -169,9 +159,9 @@
   > This **methods** we can write our own methods for authentication or for any other tasks.
   > for example :- [user.models.js](./src/models/user.models.js)
 
-  - `userSchema.methods.isPasswordCorrect()`
-  - `userSchema.methods.generateAccessToken()`
-  - `userSchema.methods.generateRefreshToken()`
+  - `userSchema.methods.isPasswordCorrect() { ....}`
+  - `userSchema.methods.generateAccessToken() { ....}`
+  - `userSchema.methods.generateRefreshToken() { ....}`
 
   > In the above function we use the `jwt.sign()` method to generate a refresh token for the user .
 
@@ -376,7 +366,7 @@
   - An aggregation pipeline can return results for groups of documents. For example, return the total, average, maximum, and minimum values.
 
 - **Aggregation Stages**
-  - [$addFields]([https://](https://www.mongodb.com/docs/current/reference/operator/aggregation/addFields/))
+  - [$addFields](<[https://](https://www.mongodb.com/docs/current/reference/operator/aggregation/addFields/)>)
   - [$lookup](https://www.mongodb.com/docs/current/reference/operator/aggregation/lookup/)
   - [$match](https://www.mongodb.com/docs/current/reference/operator/aggregation/match/)
   - [$project](https://www.mongodb.com/docs/current/reference/operator/aggregation/project/)

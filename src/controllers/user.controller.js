@@ -47,19 +47,8 @@ const registerUser = asyncHandler(async (req, res) => {
    */
 
   const { fullName, username, email, password } = req.body;
-  console.log("Email: ", email);
-  console.log("req.body -> ", req.body);
-
-  // Checking if user data is send or not
-  //   res.status(200).json({
-  //     message: "Registers successfully",
-  //     data: {
-  //       fullName,
-  //       username,
-  //       email,
-  //       password,
-  //     },
-  //   });
+  // console.log("Email: ", email);
+  // console.log("req.body -> ", req.body);
 
   // ! Ye hai aam jindagi
   //   if (fullName === "") {
@@ -78,14 +67,16 @@ const registerUser = asyncHandler(async (req, res) => {
   const userExist = await User.findOne({
     $or: [{ username }, { email }],
   });
-  console.log("userExist -> ", userExist);
+  // console.log("userExist -> ", userExist);
   if (userExist) {
     throw new ApiError(409, "User with username or email already exists");
   }
 
-  console.log("req.files -> ", req.files);
+  // console.log("req.files -> ", req.files);
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  // const coverImageLocalPath = req.files?.coverImage[0]?.path; // In this when we didn't have coverImage then it throw error like 'Cannot read properties of undefined'
+
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // NOTE: In this when we didn't have coverImage then it throw error like 'Cannot read properties of undefined'
 
   // ! So we can do it in this method we can also do for avatar
 
@@ -98,7 +89,7 @@ const registerUser = asyncHandler(async (req, res) => {
     coverImageLocalPath = req.files.coverImage[0].path;
   }
 
-  console.log("avatarLocalPath ", avatarLocalPath);
+  // console.log("avatarLocalPath ", avatarLocalPath);
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar file is required");
   }
@@ -110,13 +101,14 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar file is required");
   }
 
-  console.log("avatar -> ", avatar);
+  // console.log("avatar -> ", avatar);
 
   const user = await User.create({
     fullName,
-    // avatar: avatar.url,
-    // coverImage: coverImage?.url || "",
-    avatar: { publicId: avatar.public_id, url: avatar.url },
+    avatar: {
+      publicId: avatar.public_id,
+      url: avatar.url,
+    },
     coverImage: {
       publicId: coverImage?.public_id || "",
       url: coverImage?.url || "",
@@ -190,7 +182,7 @@ const loginUser = asyncHandler(async (req, res) => {
     "-password -refreshToken"
   );
 
-  // NOTE:  In frontend mode cookie can modify the but using this it modifies by server only
+  // NOTE:  In frontend mode cookie can modify but using this it modifies by server only
 
   const options = {
     httpOnly: true,
@@ -249,13 +241,13 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 
   try {
-    console.log("incomingRefreshToken ", incomingRefreshToken);
+    // console.log("incomingRefreshToken ", incomingRefreshToken);
     const decodedToken = jwt.verify(
       incomingRefreshToken,
       process.env.REFRESH_TOKEN_SECRET
     );
 
-    console.log(" Decoded token: ", decodedToken);
+    // console.log(" Decoded token: ", decodedToken);
 
     const user = await User.findById(decodedToken?._id);
 
@@ -312,9 +304,7 @@ const changeCurrentUserPassword = asyncHandler(async (req, res) => {
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, {}, "Password updated successfully")
-    );
+    .json(new ApiResponse(200, {}, "Password updated successfully"));
 });
 /** */
 const getCurrentUser = asyncHandler(async (req, res) => {

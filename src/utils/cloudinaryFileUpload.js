@@ -18,7 +18,7 @@ const uploadOnCloudinary = async (fileLocalPath) => {
     });
 
     // file has been uploaded on the cloudinary successfully
-    console.log("file uploaded successfully", response.url);
+    // console.log("file uploaded successfully", response.url);
     fs.unlinkSync(fileLocalPath);
 
     return response;
@@ -29,7 +29,7 @@ const uploadOnCloudinary = async (fileLocalPath) => {
   }
 };
 
-// TODO: Add file delete utility function for cloudinary 
+// FIXED: Add file delete utility function for cloudinary 
 /**
  * Using uploader.destroy(publicId, cb) this method
  */
