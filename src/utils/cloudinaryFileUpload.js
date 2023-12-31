@@ -9,7 +9,7 @@ cloudinary.config({
 
 const uploadOnCloudinary = async (fileLocalPath) => {
   try {
-    console.log("File is in uploadOnCloudinary ", fileLocalPath)
+    console.log("File is in uploadOnCloudinary ", fileLocalPath);
     if (!fileLocalPath) return null;
 
     // Upload the file on the cloudinary
@@ -22,26 +22,54 @@ const uploadOnCloudinary = async (fileLocalPath) => {
     fs.unlinkSync(fileLocalPath);
 
     return response;
-    
   } catch (error) {
     fs.unlinkSync(fileLocalPath); // remove temporary file locally if it exists locally as the upload operation got failed
     return null;
   }
 };
 
-// FIXED: Add file delete utility function for cloudinary 
+const uploadVideoOnCloudinary = async (fileLocalPath) => {
+  try {
+    console.log("File is in uploadOnCloudinary ", fileLocalPath);
+    if (!fileLocalPath) return null;
+
+    // Upload the file on the cloudinary
+    const response = await cloudinary.uploader.upload(fileLocalPath, {
+      resource_type: "video",
+    });
+
+    // file has been uploaded on the cloudinary successfully
+    // console.log("file uploaded successfully", response.url);
+    fs.unlinkSync(fileLocalPath);
+
+    return response;
+  } catch (error) {
+    fs.unlinkSync(fileLocalPath); // remove temporary file locally if it exists locally as the upload operation got failed
+    return null;
+  }
+};
+
+// FIXED: Add file delete utility function for cloudinary
 /**
  * Using uploader.destroy(publicId, cb) this method
  */
 
 const deleteOldFileInCloudinary = async (oldAvatar) => {
-  const response = await cloudinary.uploader.destroy(oldAvatar,{
-    resource_type: "image",
-  },(result) => {
-    console.log("Delete result", result);
-  })
+  const response = await cloudinary.uploader.destroy(
+    oldAvatar,
+    {
+      resource_type: "image",
+    },
+    (result) => {
+      console.log("Delete result", result);
+    }
+  );
 
   return response;
-}
+};
 
-export { uploadOnCloudinary,deleteOldFileInCloudinary };
+export {
+  uploadOnCloudinary,
+  uploadVideoOnCloudinary,
+  deleteOldFileInCloudinary,
+};
