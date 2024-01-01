@@ -54,9 +54,23 @@ const uploadVideoOnCloudinary = async (fileLocalPath) => {
  * Using uploader.destroy(publicId, cb) this method
  */
 
-const deleteOldFileInCloudinary = async (oldAvatar) => {
+const deleteOldFileInCloudinary = async (oldImagePublicId) => {
   const response = await cloudinary.uploader.destroy(
-    oldAvatar,
+    oldImagePublicId,
+    {
+      resource_type: "image",
+    },
+    (result) => {
+      console.log("Delete result", result);
+    }
+  );
+
+  return response;
+};
+
+const deleteOldVideoFileInCloudinary = async (oldVideoPublicId) => {
+  const response = await cloudinary.uploader.destroy(
+    oldVideoPublicId,
     {
       resource_type: "image",
     },
@@ -72,4 +86,5 @@ export {
   uploadOnCloudinary,
   uploadVideoOnCloudinary,
   deleteOldFileInCloudinary,
+  deleteOldVideoFileInCloudinary
 };

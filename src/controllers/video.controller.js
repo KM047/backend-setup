@@ -5,7 +5,7 @@ import { Video } from "../models/video.models.js";
 import {
   deleteOldFileInCloudinary,
   uploadOnCloudinary,
-  uploadVideoOnCloudinary,
+  deleteOldVideoFileInCloudinary
 } from "../utils/cloudinaryFileUpload.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
@@ -74,8 +74,17 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
 export { uploadVideo };
 
+
+
 /**
  * TODO: Work left
- * - Edit thumbnail and Video description
+ * - Edit thumbnail and Video description or title 
  * - Add like feature 
+ * 
+ * @problems
+ * - How you edit that particular video data you can use owner detail but owner have more than one video data
+ * 
+ * @solutions
+ * - 1) you can use video _id but how an you find its owner is logged in or not you can check its id but you can ...
+ * - 2) it necessary to add the middleware as auth.middleware for video to get the data of video  
  */

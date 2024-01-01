@@ -354,16 +354,16 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
 
   if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar file is missing");
+    throw new ApiError(401, "Avatar file is missing");
   }
 
-  console.log("avatarLocalPath ", avatarLocalPath);
+  // console.log("avatarLocalPath ", avatarLocalPath);
 
   // FIXED: delete old image which is on cloudinary
 
   const oldAvatar = req.user.avatar;
 
-  console.log("oldAvatar  ", oldAvatar);
+  // console.log("oldAvatar  ", oldAvatar);
   const avatar = await uploadOnCloudinary(avatarLocalPath);
 
   console.log(avatar);
@@ -600,3 +600,6 @@ export {
   getUserChannelProfile,
   getWatchHistory,
 };
+
+// IMP: kjsdkfjiudsdkj
+// OPTIMIZE: 
