@@ -212,8 +212,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1, // This will remove the field from the document
       },
     },
     {
@@ -600,6 +600,3 @@ export {
   getUserChannelProfile,
   getWatchHistory,
 };
-
-// IMP: kjsdkfjiudsdkj
-// OPTIMIZE: 
