@@ -2,6 +2,8 @@
 
 > This project includes the how a professional developer can setup the backend and the configuration settings for the backend and frontend.
 
+[Model link](https://app.eraser.io/workspace/YwFDgH2Q7OXHDPNhtKZ5)
+
 ## Following are the steps
 
 - step 1: first initialize the backend setup using below command
