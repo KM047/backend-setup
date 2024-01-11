@@ -2,7 +2,9 @@
 
 > This project includes the how a professional developer can setup the backend and the configuration settings for the backend and frontend.
 
-[Model link](https://app.eraser.io/workspace/YwFDgH2Q7OXHDPNhtKZ5)
+- [Model link](https://app.eraser.io/workspace/YwFDgH2Q7OXHDPNhtKZ5)
+
+- [Figma link](https://www.figma.com/file/shmxWL5FKRO5GNOPPopBg6/PLAY?type=design&node-id=0-1&mode=design&t=Pe21S9r22VJqDzEw-0)
 
 ## Following are the steps
 

@@ -58,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //? Ye hai Mentos jindagi
 
   if (
-    [fullName, username, email, password].some((field) => field?.trim() === "")
+    [fullName, username, email, password].some((field) => field?.trim() === "" || field?.trim() === undefined)
   ) {
     throw new ApiError(400, `${field} is required`);
   }

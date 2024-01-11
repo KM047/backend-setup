@@ -5,16 +5,26 @@ import { Video } from "../models/video.models.js";
 import {
   deleteOldFileInCloudinary,
   uploadOnCloudinary,
-  deleteOldVideoFileInCloudinary
+  deleteOldVideoFileInCloudinary,
 } from "../utils/cloudinaryFileUpload.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-const uploadVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
+const getAllVideos = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
+  // TODO: get all videos based on query, sort, pagination
+});
 
-  if ([title, description].some((field) => field?.trim() === "")) {
+const publishAVideo = asyncHandler(async (req, res) => {
+  const { title, description } = req.body;
+  // DONE: get video, upload to cloudinary, create video
+
+  if (
+    [title, description].some(
+      (field) => field?.trim() === "" || field.trim() === undefined
+    )
+  ) {
     throw new ApiError(400, `${field} is required`);
   }
 
@@ -72,19 +82,43 @@ const uploadVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, video, "Video uploaded successfully"));
 });
 
-export { uploadVideo };
+const getVideoById = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  //TODO: get video by id
+});
 
+const updateVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  //TODO: update video details like title, description, thumbnail
+});
 
+const deleteVideo = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  //TODO: delete video
+});
+
+const togglePublishStatus = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+});
+
+export {
+  getAllVideos,
+  publishAVideo,
+  getVideoById,
+  updateVideo,
+  deleteVideo,
+  togglePublishStatus,
+};
 
 /**
  * TODO: Work left
- * - Edit thumbnail and Video description or title 
- * - Add like feature 
- * 
+ * - Edit thumbnail and Video description or title
+ * - Add like feature
+ *
  * @problems
  * - How you edit that particular video data you can use owner detail but owner have more than one video data
- * 
+ *
  * @solutions
  * - 1) you can use video _id but how an you find its owner is logged in or not you can check its id but you can ...
- * - 2) it necessary to add the middleware as auth.middleware for video to get the data of video  
+ * - 2) it necessary to add the middleware as auth.middleware for video to get the data of video
  */
