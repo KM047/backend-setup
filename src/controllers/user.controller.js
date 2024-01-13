@@ -437,7 +437,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     { new: true }
   );
 
-  if (!oldCoverImage.publicId === "") {
+  if (!oldCoverImage === "") {
     try {
       const isOldImageDelete = await deleteOldFileInCloudinary(
         oldCoverImage

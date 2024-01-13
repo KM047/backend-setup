@@ -70,8 +70,8 @@ const deleteOldFileInCloudinary = async (imageURL) => {
   return response;
 };
 
-const deleteOldVideoFileInCloudinary = async (imageURL) => {
-  const oldVideoPublicId =  imageURL.split("/").pop().split(".")[0];
+const deleteOldVideoFileInCloudinary = async (videoURL) => {
+  const oldVideoPublicId =  videoURL.split("/").pop().split(".")[0];
   const response = await cloudinary.uploader.destroy(
     oldVideoPublicId,
     {
