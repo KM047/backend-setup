@@ -58,7 +58,9 @@ const registerUser = asyncHandler(async (req, res) => {
   //? Ye hai Mentos jindagi
 
   if (
-    [fullName, username, email, password].some((field) => field?.trim() === "" || field?.trim() === undefined)
+    [fullName, username, email, password].some(
+      (field) => field?.trim() === "" || field?.trim() === undefined
+    )
   ) {
     throw new ApiError(400, `${field} is required`);
   }
@@ -105,14 +107,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({
     fullName,
-    avatar: {
-      publicId: avatar.public_id,
-      url: avatar.url,
-    },
-    coverImage: {
-      publicId: coverImage?.public_id || "",
-      url: coverImage?.url || "",
-    },
+    avatar: avatar.url,
+    coverImage: coverImage?.url || "",
     email,
     password,
     username: username.toLowerCase(),
@@ -375,7 +371,8 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        avatar: { publicId: avatar.public_id, url: avatar.url },
+        // avatar: { publicId: avatar.public_id, url: avatar.url },
+        avatar: avatar.url,
       },
     },
     {
@@ -389,7 +386,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 
   try {
     const isOldImageDelete = await deleteOldFileInCloudinary(
-      oldAvatar.publicId
+      oldAvatar
     );
     console.log("isOldImageDelete ", isOldImageDelete);
   } catch (error) {
@@ -430,10 +427,11 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        coverImage: {
-          publicId: coverImage?.public_id || "",
-          url: coverImage?.url || "",
-        },
+        // coverImage: {
+        //   publicId: coverImage?.public_id || "",
+        //   url: coverImage?.url || "",
+        // },
+        coverImage: coverImage?.url,
       },
     },
     { new: true }
@@ -442,7 +440,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   if (!oldCoverImage.publicId === "") {
     try {
       const isOldImageDelete = await deleteOldFileInCloudinary(
-        oldCoverImage.publicId
+        oldCoverImage
       );
       console.log("isOldImageDelete ", isOldImageDelete);
     } catch (error) {

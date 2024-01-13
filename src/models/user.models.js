@@ -27,28 +27,28 @@ const userSchema = new Schema(
       lowercase: true,
     },
     avatar: {
-      // type: String, // https://cloudinary.com/  url
-      // required: true,
-      publicId: {
-        type: String,
-        required: true,
-      },
-      url: {
-        type: String,
-        required: true,
-      },
+      type: String, // https://cloudinary.com/url
+      required: true,
+      // publicId: {
+      //   type: String,
+      //   required: true,
+      // },
+      // url: {
+      //   type: String,
+      //   required: true,
+      // },
     },
     coverImage: {
-      // type: String,
+      type: String,
 
-      publicId: {
-        type: String,
-        // required: true,
-      },
-      url: {
-        type: String,
-        // required: true,
-      },
+      // publicId: {
+      //   type: String,
+      //   // required: true,
+      // },
+      // url: {
+      //   type: String,
+      //   // required: true,
+      // },
     },
     watchHistory: {
       type: Schema.Types.ObjectId,
