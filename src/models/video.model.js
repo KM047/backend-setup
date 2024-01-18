@@ -6,26 +6,10 @@ const videoSchema = new Schema(
     videoFile: {
       type: String, // https://cloudinary.com/url
       required: true,
-      // publicId: {
-      //   type: String,
-      //   required: true,
-      // },
-      // url: {
-      //   type: String,
-      //   required: true,
-      // },
     },
     thumbnail: {
       type: String, // https://cloudinary.com/url
       required: true,
-      // publicId: {
-      //   type: String,
-      //   required: true,
-      // },
-      // url: {
-      //   type: String,
-      //   required: true,
-      // },
     },
 
     title: {

@@ -1,18 +1,13 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { User } from "../models/user.models.js";
-import { Video } from "../models/video.models.js";
-import {
-  deleteOldFileInCloudinary,
-  uploadOnCloudinary,
-  deleteOldVideoFileInCloudinary,
-} from "../utils/cloudinaryFileUpload.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import jwt from "jsonwebtoken";
 import mongoose, { isValidObjectId } from "mongoose";
+import { Video } from "../models/video.model.js";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
-  const {
+  let {
     page = 1,
     limit = 10,
     query = " ",
@@ -20,68 +15,122 @@ const getAllVideos = asyncHandler(async (req, res) => {
     sortType,
     userId,
   } = req.query;
-  // TODO: get all videos based on query, sort, pagination
+  //TODO: get all videos based on query, sort, pagination
 
-  let options = {
-    page: isNaN(page) ? 1 : Number(page),
-    limit: isNaN(limit) ? 10 : Number(limit),
-  };
+  // console.log("query ", query, " userId ", userId);
+  page = isNaN(page) ? 1 : Number(page);
+  limit = isNaN(page) ? 10 : Number(limit);
 
-  if (page <= 0) {
+  //because 0 is not acceptable ein skip and limit in aggregate pipeline
+  if (page < 0) {
     page = 1;
   }
   if (limit <= 0) {
-    page = 10;
+    limit = 10;
   }
 
   const matchStage = {};
-
+  
   if (userId && isValidObjectId(userId)) {
-    matchStage.owner = {
+    matchStage["$match"] = {
       owner: new mongoose.Types.ObjectId(userId),
     };
-  }
-  if (query) {
-    matchStage.$match = {
+  } else if (query) {
+    matchStage["$match"] = {
       $or: [
-        {
-          title: {
-            $regex: query,
-            $options: "i", // IMP: This 'i' is for case insensitive
-          },
-        },
-        {
-          description: {
-            $regex: query,
-            $options: "i",
-          },
-        },
+        { title: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
       ],
     };
   } else {
-    matchStage.$match = {};
+    matchStage["$match"] = {};
+  }
+  if (userId && query) {
+    matchStage["$match"] = {
+      $and: [
+        { owner: new mongoose.Types.ObjectId(userId) },
+        {
+          $or: [
+            { title: { $regex: query, $options: "i" } },
+            { description: { $regex: query, $options: "i" } },
+          ],
+        },
+      ],
+    };
   }
 
-  const sortOptions = {};
-
+  const sortStage = {};
   if (sortBy && sortType) {
-    sortOptions[sortType] = sortBy === "desc" ? -1 : 1;
+    sortStage["$sort"] = {
+      [sortBy]: sortType === "asc" ? 1 : -1,
+    };
+  } else {
+    sortStage["$sort"] = {
+      createdAt: -1,
+    };
   }
 
-  const videos = await Video.aggregatePaginate(matchStage, {
-    page: parseInt(page),
-    limit: parseInt(limit),
-    sort: sortOptions,
-  });
+  // const skipStage = { $skip: (page - 1) * limit };
+  // const limitStage = { $limit: limit };
+
+  const videos = await Video.aggregate([
+    matchStage,
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              fullName: 1,
+              username: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "video",
+        as: "likes",
+      },
+    },
+    sortStage,
+    {
+      $skip: (page - 1) * limit,
+    },
+    {
+      $limit: limit,
+    },
+    {
+      $addFields: {
+        owner: {
+          $first: "$owner",
+        },
+        likes: {
+          $size: "$likes",
+        },
+      },
+    },
+  ]);
+
+  if (!videos) {
+    throw new ApiError(500, "something want wrong while get all videos");
+  }
 
   return res
-    .status(201)
-    .json(new ApiResponse(200, videos, "Videos retrieved successfully..."));
+    .status(200)
+    .json(new ApiResponse(200, videos, "get all videos successfully"));
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
-  // DONE: get video, upload to cloudinary, create video
+  const { title, description, isPublished = true } = req.body;
+  // TODO: get video, upload to cloudinary, create video
 
   if (
     [title, description].some(
@@ -121,7 +170,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
   const videoFile = await uploadOnCloudinary(videoLocalPath);
   const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
-  console.log("Uploaded video file ", videoFile);
+  // console.log("Uploaded video file ", videoFile);
 
   const user = await User.findById(req.user?._id).select(
     "-password -refreshToken"
@@ -131,13 +180,13 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found");
   }
   const video = await Video.create({
-    videoFile: { publicId: videoFile.public_id, url: videoFile.url },
-    thumbnail: { publicId: thumbnail.public_id, url: thumbnail.url },
-    title,
-    description,
+    videoFile: videoFile.url,
+    thumbnail: thumbnail.url,
+    title: title,
+    description: description,
     duration: videoFile.duration,
-    isPublished: true,
-    owner: user,
+    isPublished: isPublished,
+    owner: user._id,
   });
 
   return res
@@ -153,11 +202,35 @@ const getVideoById = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Video not found");
   }
 
-  if (isValidObjectId(videoId)) {
+  if (!isValidObjectId(videoId)) {
     throw new ApiError(404, "Video id is not correct");
   }
 
-  const video = await Video.findById(videoId);
+  const video = await Video.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(videoId),
+      },
+    },
+    {
+      $lookup: {
+        from: "likes",
+        localField: "_id",
+        foreignField: "video",
+        as: "likes",
+      },
+    },
+    {
+      $addFields: {
+        likesCount: { $size: "$likes" },
+      },
+    },
+    {
+      $project: {
+        likes: 0,
+      },
+    },
+  ]);
 
   return res
     .status(200)
@@ -207,7 +280,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const togglePublishStatus = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  if (!videoId || isValidObjectId(videoId)) {
+  if (!videoId || !isValidObjectId(videoId)) {
     throw new ApiError(404, "Video not found ");
   }
 

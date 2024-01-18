@@ -161,7 +161,7 @@
   ```
 
   > This **methods** we can write our own methods for authentication or for any other tasks.
-  > for example :- [user.models.js](./src/models/user.models.js)
+  > for example :- [user.model.js](./src/models/user.model.js)
 
   - `userSchema.methods.isPasswordCorrect() { ....}`
   - `userSchema.methods.generateAccessToken() { ....}`
@@ -169,7 +169,7 @@
 
   > In the above function we use the `jwt.sign()` method to generate a refresh token for the user .
 
-  - [user.models.js](./src/models/user.models.js)
+  - [user.model.js](./src/models/user.model.js)
 
   ```javascript
   // This is code from userSchema.methods.generateAccessToken()
