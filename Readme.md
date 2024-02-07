@@ -11,7 +11,7 @@
 - step 1: first initialize the backend setup using below command
 
   ```shell
-  node init
+  npm init
   ```
 
 ---
